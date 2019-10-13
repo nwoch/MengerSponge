@@ -1,26 +1,70 @@
-import java.awt.Dimension;
-import java.awt.image.BufferedImage;
+import java.util.LinkedList;
+import java.util.Queue;
 
-public interface MengerSponge {
+public class MengerSponge {
 
-    public void render(BufferedImage scene, double[][] pixelColors);
-    //   Set color of each pixel in the scene
+    private Queue<SpongeCube> cubes;
 
-    public double[][] rayTrace(Point3D cameraPosition, double horizontalFOVAngle, double verticalFOVAngle, Dimension imgResolution, LightSource lightSource);
-    //generate a 3D pixel grid in which each square in the grid maps to a pixel in the imgResolution (using fov angles for scaling)
-    //do the following for each pixel/square in the grid:
-    //cameraRay = create a ray from cameraPosition through the center of the pixel
-    //cameraIntersection = intersectWithShape(cameraPosition, cameraRay) -> involves extending the ray to see if/where it intersects the scene
-    //if cameraIntersection != null:
-    //lightRay = create a ray from cameraIntersection to the light source
-    //lightIntersection = intersectWithShape(cameraIntersection, lightRay)-> involves extending the ray to see if/where it intersects the scene
-    //if lightIntersection == null:
-    //calculate light intensity and set as pixelColors[i][j]
+    public MengerSponge() {
+        cubes = new LinkedList<>();
+        cubes.add(new SpongeCube(new Point3D(-100.0, 100.0, -100.0), 200.0, 4));
+    }
 
-    public Point3D intersectWithSphere(Point3D startingPoint, Point3D ray);
-    //returns intersection point if it exists, otherwise returns null
+//    public List<SpongeCube> buildMengerSponge(List<SpongeCube> currentSpongeCubes, int n) {
+//        if(n == 0) {
+//            return currentSpongeCubes;
+//        }
+//        List<SpongeCube> newSpongeCubes = new ArrayList<>();
+//        double edgeIncrement = currentSpongeCubes.get(0).getEdgeLength()/3.0;
+//        for(SpongeCube cube : currentSpongeCubes) {
+//            double upperLeftX = cube.getVertices()[0].getX();
+//            double upperLeftY = cube.getVertices()[0].getY();
+//            double upperLeftZ = cube.getVertices()[0].getZ();
+//            for(int i = 0; i < 3; i++) {
+//                double y = upperLeftY * -i;
+//                for(int j = 0; j < 3; j++) {
+//                    double z = upperLeftZ * j;
+//                    for(int k = 0; k < 3; k++) {
+//                        double x = upperLeftX * k;
+//                        newSpongeCubes.add(new SpongeCube(new Point3D(x, y, z), edgeIncrement));
+//                    }
+//                }
+//            }
+//        }
+//        return buildMengerSponge(newSpongeCubes, n - 1);
+//    }
 
-    public Point3D intersectWithSponge(Point3D startingPoint, Point3D ray);
-    //returns intersection point if it exists, otherwise returns null
+    public Point3D intersectWithSponge(Point3D startingPoint, Point3D ray) {
+        //make increments generic for any direction
+        while(!cubes.isEmpty()) {
+            SpongeCube cube = cubes.remove();
+            if(cube.intersectsSpongeCube(startingPoint, ray)) {
+                if(cube.getLevel() == 0) { return cube.findIntersectionPoint(startingPoint, ray); }
+                else {
+                    cubes.clear();
+                    double edgeIncrement = cube.getEdgeLength()/3.0;
+                    double upperLeftX = cube.getUpperLeftVertex().getX();
+                    double upperLeftY = cube.getUpperLeftVertex().getY();
+                    double upperLeftZ = cube.getUpperLeftVertex().getZ();
+                    int level = cube.getLevel();
+                    for(int i = 0; i < 3; i++) {
+                        double y = upperLeftY * -i;
+                        for(int j = 0; j < 3; j++) {
+                            double z = upperLeftZ * j;
+                            for(int k = 0; k < 3; k++) {
+                                double x = upperLeftX * k;
+                                if((i != 0 || j != 1 || k != 1) && (i != 1 || (j + k) % 2 == 0)) {
+                                    cubes.add(new SpongeCube(new Point3D(x, y, z), edgeIncrement, level - 1));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
 
 }
