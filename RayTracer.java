@@ -1,16 +1,25 @@
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.awt.*;
 
 public class RayTracer implements MengerSponge {
+
+  BufferedImage image;
 
   Sphere sphere;
 
   public RayTracer() {
-    sphere = new Sphere(50.0, new Point3D(0.0,0.0,0.0)); //change this to place the sphere
+    sphere = new Sphere(100.0, new Point3D(0.0,0.0,0.0)); //change this to place the sphere
   }
 
   public void render(BufferedImage scene, double[][] pixelColors) {
-
+    image = scene;
+    for(int i = 0; i < image.getHeight(); i++) {
+      for(int j = 0; j < image.getWidth(); j++) {
+        int currentColorValue = (int)pixelColors[j][i];
+        image.setRGB(j, i, new Color(currentColorValue, currentColorValue, currentColorValue).getRGB());
+      }
+    }
   }
 
   public double[][] rayTrace(Point3D cameraPosition, double horizontalFOVAngle, double verticalFOVAngle, Dimension imgResolution, LightSource lightSource) {
@@ -50,13 +59,15 @@ public class RayTracer implements MengerSponge {
         }
       }
     }
+    int imageWidth = (int)imgResolution.getWidth();
+    int imageHeight = (int)imgResolution.getHeight();
+    render(new BufferedImage(imageWidth, imageHeight,  BufferedImage.TYPE_INT_RGB), pixelColors);
     return pixelColors;
   }
 
   public Point3D intersectWithSphere(Point3D startingPoint, Point3D ray) {
     //returns intersection point if it exists, otherwise returns null
-    sphere.intersectWithSphere(startingPoint, ray);
-    return startingPoint;
+    return sphere.intersectWithSphere(startingPoint, ray);
   }
 
   public Point3D intersectWithSponge(Point3D startingPoint, Point3D ray) {
@@ -77,15 +88,6 @@ public class RayTracer implements MengerSponge {
     double pixelCameraY = (1 - (2 * pixelScreenY)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
 
     return new Point3D(pixelCameraX, pixelCameraY, -1.0);
-  }
-
-  public static void main(String args[]) {
-    RayTracer ray = new RayTracer();
-    Point3D camera = new Point3D(0.0, 0.0, 0.0); //set camera point
-    Point3D light = new Point3D(300.0, 300.0, 300.0); //set light point
-    Dimension imageResolution = new Dimension(100, 100); //image size
-    LightSource lightSource = new LightSource(light, 60); //create light source
-    ray.rayTrace(camera, 45, 45, imageResolution, lightSource);
   }
 
 }
