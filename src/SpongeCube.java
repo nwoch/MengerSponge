@@ -99,7 +99,7 @@ public class SpongeCube {
 
     private void computeVertices() {
         this.vertices[0] = this.upperLeftVertex;
-        this.vertices[4] = new Point3D(this.upperLeftVertex.getX(), this.upperLeftVertex.getY() - this.edgeLength, this.upperLeftVertex.getZ());
+        this.vertices[4] = new Point3D(this.upperLeftVertex.getX(), this.upperLeftVertex.getY() + this.edgeLength, this.upperLeftVertex.getZ());
         for(int i = 0; i < 5; i += 4) {
             this.vertices[i + 1] = new Point3D(this.vertices[i].getX(), this.vertices[i].getY(), this.vertices[i].getZ() + this.edgeLength);
             this.vertices[i + 2] = new Point3D(this.vertices[i].getX() + this.edgeLength, this.vertices[i].getY(), this.vertices[i].getZ() + this.edgeLength);
