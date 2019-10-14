@@ -12,8 +12,8 @@ public class Canvas extends JPanel {
 
   RayTracer rayTracer;
 
-  Point3D camera = new Point3D(1500.0, -850.0, 1000.0); //set camera point
-  Point3D light = new Point3D(1000.0, -1000.0, 1000.0); //set light point
+  Point3D camera = new Point3D(0, 0, 2000); //set camera point - 0, 0, 1500
+  Point3D light = new Point3D(0, 0, 1000); //set light point - middle view: 0, 0, 1000
   Dimension imageResolution = new Dimension(1600, 900); //image size
   LightSource lightSource = new LightSource(light, 20); //create light source
 

@@ -5,7 +5,7 @@ public class MengerSponge {
     private final SpongeCube outerCube;
 
     public MengerSponge() {
-        this.outerCube = new SpongeCube(new Point3D(-500.0, -500.0, -500.0), 1000.0, 1);
+        this.outerCube = new SpongeCube(new Point3D(-500, -500, -500.0), 1000.0, 4);
     }
 
 //    public List<SpongeCube> buildMengerSponge(List<SpongeCube> currentSpongeCubes, int n) {
@@ -42,7 +42,7 @@ public class MengerSponge {
 
         while(!cubes.isEmpty()) {
             SpongeCube cube = cubes.remove();
-            if(cube.intersectsSpongeCube2(startingPoint, ray)) {
+            if(cube.intersectsSpongeCube(startingPoint, ray)) {
                 if(cube.getLevel() == 0) {
                     intersectedCubes.add(cube);
                 } else {
@@ -78,7 +78,7 @@ public class MengerSponge {
             for(int i = 0; i < intersectedCubes.size(); i++) {
                 tValues[i] = intersectedCubes.get(i).getT();
             }
-            double minTValue = intersectedCubes.get(0).findMaxOrMin(tValues, 0);
+            double minTValue = intersectedCubes.get(0).findMin(tValues);
             for(SpongeCube cube : intersectedCubes) {
                 if(cube.getT() == minTValue) {
                     Point3D intersectionPoint = cube.findIntersectionPoint(startingPoint, ray);

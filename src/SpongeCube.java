@@ -20,7 +20,7 @@ public class SpongeCube {
         this.vertices = new Point3D[8];
     }
 
-    public boolean intersectsSpongeCube(Point3D o, Point3D dir) {
+    public boolean intersectsSpongeCube2(Point3D o, Point3D dir) {
         Point3D lb = this.upperLeftVertex;
         Point3D rt = new Point3D(lb.getX() + edgeLength, lb.getY() + edgeLength, lb.getZ() + edgeLength);
 
@@ -59,67 +59,53 @@ public class SpongeCube {
         return true;
     }
 
-    public boolean intersectsSpongeCube2(Point3D startingPoint, Point3D ray) {
-        this.computeVertices();
-        double[] xValues = new double[8];
-        double[] yValues = new double[8];
-        double[] zValues = new double[8];
-        for(int i = 0; i < this.vertices.length; i++) {
-            xValues[i] = this.vertices[i].getX();
-            yValues[i] = this.vertices[i].getY();
-            zValues[i] = this.vertices[i].getZ();
-        }
-        double[] maxMinValues = new double[]{this.findMaxOrMin(xValues, 0), this.findMaxOrMin(xValues, 1),
-                                             this.findMaxOrMin(yValues, 0), this.findMaxOrMin(yValues, 1),
-                                             this.findMaxOrMin(zValues, 0), this.findMaxOrMin(zValues, 1)};
+    public boolean intersectsSpongeCube(Point3D startingPoint, Point3D ray) {
+        double[] maxMinValues = new double[]{this.upperLeftVertex.getX(), this.upperLeftVertex.getX() + this.edgeLength,
+                                             this.upperLeftVertex.getY(), this.upperLeftVertex.getY() + this.edgeLength,
+                                             this.upperLeftVertex.getZ(), this.upperLeftVertex.getZ() + this.edgeLength};
         //solve for Ts using equation of line
         double[] startingPointCoords = new double[] {startingPoint.getX(), startingPoint.getY(), startingPoint.getZ()};
         double[] rayDirections = new double[] {ray.getX(), ray.getY(), ray.getZ()};
         double[][] tIntervals = new double[3][2];
         for(int i = 0; i < 6; i++) {
-            // integer division?
             double t = (maxMinValues[i] - startingPointCoords[i/2])/rayDirections[i/2];
-            tIntervals[i/2][i % 2] = t;
+            tIntervals[i/2][i%2] = t;
         }
         //find if/where intervals overlap
-        double maxT = this.findMaxOrMin(new double[] {tIntervals[0][0], tIntervals[1][0], tIntervals[2][0]}, 1);
-        double minT = this.findMaxOrMin(new double[] {tIntervals[0][1], tIntervals[1][1], tIntervals[2][1]}, 0);
-//        System.out.println(maxT);
-//        System.out.println(minT);
-        Point3D intersectionPoint = findIntersectionPoint(startingPoint, ray);
-//        System.out.println("intersection point " + intersectionPoint.getX() + ", " + intersectionPoint.getY() + ", " + intersectionPoint.getZ());
-        if(maxT < minT) { return false; }
+        double minT = this.findMax(extractRangeStart(tIntervals));
+        double maxT = this.findMin(extractRangeEnd(tIntervals));
+        if(maxT < 0 || maxT < minT) { return false; }
+        if(minT < 0) { this.t = maxT; } // ray starts inside the sponge, so must use 2nd intersection point/maxT
         this.t = minT;
         return true;
+    }
+
+    private double[] extractRangeEnd(double[][] tIntervals) {
+        return new double[] {Math.max(tIntervals[0][0],tIntervals[0][1]),Math.max(tIntervals[1][0],tIntervals[1][1]),Math.max(tIntervals[2][0],tIntervals[2][1])};
+    }
+
+    private double[] extractRangeStart(double[][] tIntervals) {
+        return new double[] {Math.min(tIntervals[0][0],tIntervals[0][1]),Math.min(tIntervals[1][0],tIntervals[1][1]),Math.min(tIntervals[2][0],tIntervals[2][1])};
     }
 
     public Point3D findIntersectionPoint(Point3D startingPoint, Point3D ray) {
         return startingPoint.addVector(ray.scale(this.t));
     }
 
-    private void computeVertices() {
-        this.vertices[0] = this.upperLeftVertex;
-        this.vertices[4] = new Point3D(this.upperLeftVertex.getX(), this.upperLeftVertex.getY() + this.edgeLength, this.upperLeftVertex.getZ());
-        for(int i = 0; i < 5; i += 4) {
-            this.vertices[i + 1] = new Point3D(this.vertices[i].getX(), this.vertices[i].getY(), this.vertices[i].getZ() + this.edgeLength);
-            this.vertices[i + 2] = new Point3D(this.vertices[i].getX() + this.edgeLength, this.vertices[i].getY(), this.vertices[i].getZ() + this.edgeLength);
-            this.vertices[i + 3] = new Point3D(this.vertices[i].getX() + this.edgeLength, this.vertices[i].getY(), this.vertices[i].getZ());
+    public double findMin(double[] values) {
+        double currentMin = values[0];
+        for(int i = 1; i < values.length; i++) {
+            currentMin = Math.min(currentMin, values[i]);
         }
+        return currentMin;
     }
 
-    public double findMaxOrMin(double[] values, int maxOrMin) {
-        double currentMaxOrMin = values[0];
-        if(maxOrMin == 0) {
-            for(int i = 1; i < values.length; i++) {
-                currentMaxOrMin = Math.min(currentMaxOrMin, values[i]);
-            }
+    public double findMax(double[] values) {
+        double currentMax = values[0];
+        for(int i = 1; i < values.length; i++) {
+            currentMax = Math.max(currentMax, values[i]);
         }
-        else if(maxOrMin == 1) {
-            for(int i = 1; i < values.length; i++) {
-                currentMaxOrMin = Math.min(currentMaxOrMin, values[i]);
-            }
-        }
-        return currentMaxOrMin;
+        return currentMax;
     }
 
     public Point3D findIntersectedFaceNormal(Point3D intersectionPoint) {
