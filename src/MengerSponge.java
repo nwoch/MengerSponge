@@ -1,5 +1,4 @@
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class MengerSponge {
 
@@ -34,15 +33,16 @@ public class MengerSponge {
 //        return buildMengerSponge(newSpongeCubes, n - 1);
 //    }
 
-    public Point3D intersectWithSponge(Point3D startingPoint, Point3D ray) {
+    public Intersection intersectWithSponge(Point3D startingPoint, Point3D ray) {
         //make increments generic for any direction
+        List<SpongeCube> intersectedCubes = new ArrayList<>();
         while(!cubes.isEmpty()) {
             SpongeCube cube = cubes.remove();
             if(cube.intersectsSpongeCube(startingPoint, ray)) {
-                if(cube.getLevel() == 0) { return cube.findIntersectionPoint(startingPoint, ray); }
-                else {
-                    cubes.clear();
-                    double edgeIncrement = cube.getEdgeLength()/3.0;
+                if(cube.getLevel() == 0) {
+                    intersectedCubes.add(cube);
+                } else {
+                    double edgeIncrement = cube.getEdgeLength() / 3.0;
                     double upperLeftX = cube.getUpperLeftVertex().getX();
                     double upperLeftY = cube.getUpperLeftVertex().getY();
                     double upperLeftZ = cube.getUpperLeftVertex().getZ();
@@ -53,12 +53,25 @@ public class MengerSponge {
                             double z = upperLeftZ * j;
                             for(int k = 0; k < 3; k++) {
                                 double x = upperLeftX * k;
-                                if((i != 0 || j != 1 || k != 1) && (i != 1 || (j + k) % 2 == 0)) {
+                                if((i == 2 || j != 1 || k != 1) && (i != 1 || (j + k) % 2 == 0)) {
                                     cubes.add(new SpongeCube(new Point3D(x, y, z), edgeIncrement, level - 1));
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
+        if(!intersectedCubes.isEmpty()) {
+            double[] tValues = new double[intersectedCubes.size()];
+            for(int i = 0; i < intersectedCubes.size(); i++) {
+                tValues[i] = intersectedCubes.get(i).getT();
+            }
+            double minTValue = intersectedCubes.get(0).findMaxOrMin(tValues, 0);
+            for(SpongeCube cube : intersectedCubes) {
+                if(cube.getT() == minTValue) {
+                    Point3D intersectionPoint = cube.findIntersectionPoint(startingPoint, ray);
+                    return (new Intersection(intersectionPoint, cube.findIntersectedFaceNormal(intersectionPoint)));
                 }
             }
         }
