@@ -12,13 +12,13 @@ public class Canvas extends JPanel {
 
   RayTracer rayTracer;
 
-  Point3D camera = new Point3D(0.0, 0.0, 0.0); //set camera point
-  Point3D light = new Point3D(0.0, 0.0, 500.0); //set light point
-  Dimension imageResolution = new Dimension(500, 500); //image size
+  Point3D camera = new Point3D(1500.0, -850.0, 1000.0); //set camera point
+  Point3D light = new Point3D(1000.0, -1000.0, 1000.0); //set light point
+  Dimension imageResolution = new Dimension(1600, 900); //image size
   LightSource lightSource = new LightSource(light, 20); //create light source
 
   public Canvas() {
-    setPreferredSize(new Dimension(600,600));
+    setPreferredSize(imageResolution);
     setBackground(Color.white);
     rayTracer = new RayTracer();
   }
@@ -26,7 +26,7 @@ public class Canvas extends JPanel {
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
     Graphics2D g2d = (Graphics2D)g;
-    rayTracer.rayTrace(camera, 90, 90, imageResolution, lightSource);
-    g2d.drawImage(rayTracer.image, 50, 50, this);
+    rayTracer.rayTrace(camera, 70, 90, imageResolution, lightSource);
+    g2d.drawImage(rayTracer.image, 0, 0, this);
   }
 }

@@ -5,13 +5,13 @@ import java.util.List;
  * @author Nicole Woch
  * Class which represents a point light source and contains methods
  * for calculating the intensity of the light source at different points on a surface.
- **/
+ */
 public class LightSource {
 
     private Point3D lightSourcePosition;
-    public int ambientLight;
+    private int ambientLight;
 
-    /** Constructor which sets the class variables: the light source's position and the ambient light value. **/
+    /** Constructor which sets the class variables: the light source's position and the ambient light value. */
     public LightSource(Point3D lightSourcePosition, int ambientLight) {
         this.lightSourcePosition = lightSourcePosition;
         this.ambientLight = ambientLight;
@@ -20,7 +20,7 @@ public class LightSource {
     /**
      * Calculates the intensity of the light source at each point on a surface
      * by summing ambient light, diffuse light, and specular reflection. Sum must fall between 0 and 255.
-     **/
+     */
     public List<Double> calcLightIntensity(List<Point3D> surfaceNormals) {
         List<Double> lightIntensities = new ArrayList<>();
         for(Point3D normal : surfaceNormals) {
@@ -35,7 +35,7 @@ public class LightSource {
     /**
      * Calculates diffuse light from the light source at a point on a surface
      * using the normal vector at that point and the vector from the point to the light source.
-     **/
+     */
     public double calcDiffuseLight(Point3D normalVector, Point3D lightVector) {
         Point3D unitNormal = normalVector.normalize();
         Point3D unitLight = lightVector.normalize();
@@ -47,7 +47,7 @@ public class LightSource {
     /**
      * Calculates specular reflection from the light source at a point on a surface
      * using the vector from the point to the eye and the reflected ray at that point.
-     **/
+     */
     public double calcSpecularReflection(Point3D normalVector, Point3D lightVector, double diffuseLight) {
         double projectionLength = lightVector.dotProduct(normalVector)/normalVector.magnitude();
         Point3D w = normalVector.normalize().scale(projectionLength);
@@ -58,8 +58,10 @@ public class LightSource {
         return ((255.0 - ambientLight - diffuseLight) * Math.pow(cos, 1.5));
     }
 
-    /** Getters & Setters **/
+    /** Getters & Setters */
     public void setLightSourcePosition(Point3D lightSourcePosition) { this.lightSourcePosition = lightSourcePosition; }
     public Point3D getLightSourcePosition() { return lightSourcePosition; }
+    public int getAmbientLight() { return ambientLight; }
+
 
 }
