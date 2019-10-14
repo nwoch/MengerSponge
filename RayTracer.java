@@ -8,8 +8,11 @@ public class RayTracer implements MengerSponge {
 
   Sphere sphere;
 
+  double counter;
+
   public RayTracer() {
-    sphere = new Sphere(100.0, new Point3D(0.0,0.0,0.0)); //change this to place the sphere
+    sphere = new Sphere(200.0, new Point3D(0.0,0.0,-300.0)); //change this to place the sphere
+    counter = 0;
   }
 
   public void render(BufferedImage scene, double[][] pixelColors) {
@@ -17,7 +20,7 @@ public class RayTracer implements MengerSponge {
     for(int i = 0; i < image.getHeight(); i++) {
       for(int j = 0; j < image.getWidth(); j++) {
         int currentColorValue = (int)pixelColors[j][i];
-        image.setRGB(j, i, new Color(currentColorValue, currentColorValue, currentColorValue).getRGB());
+        image.setRGB(j, i, new Color(currentColorValue, currentColorValue, currentColorValue).getRGB()); //currently in gray scale
       }
     }
   }
@@ -26,42 +29,36 @@ public class RayTracer implements MengerSponge {
     double[][] pixelColors = new double[(int)imgResolution.getWidth()][(int)imgResolution.getHeight()];
     for(int y = 0; y < imgResolution.getHeight(); y++) { //y pixel coordinate
       for(int x = 0; x < imgResolution.getWidth(); x++) { //x pixel coordiante
-        System.out.println("Current Point: " + x + ", " + y);
         /** Create the View Plane and find coordinate in center of current pixel to create new 3D point **/
         Point3D fieldOfViewCoordinate = createViewPlane(x, y, cameraPosition, horizontalFOVAngle, verticalFOVAngle, imgResolution);
         /** Create a ray from the camera position to the view plane coordinates **/
         Point3D cameraRay = fieldOfViewCoordinate.subtractVector(cameraPosition);
-        System.out.println("Camera Ray at Current Pixel: " + cameraRay.getX() + ", " + cameraRay.getY() + ", " + cameraRay.getZ());
+        cameraRay = cameraRay.normalize();
         /** Check if this create ray intersects with the sphere **/
         Point3D cameraIntersection = intersectWithSphere(cameraPosition, cameraRay);
         if(cameraIntersection != null) { //If the ray does intersect with the sphere shape
-          System.out.println("Intersects With Sphere!");
-          System.out.println("Intersection Point: " + cameraIntersection.getX() + ", " + cameraIntersection.getY() + ", " + cameraIntersection.getZ());
           /** Create a ray from this point of intersection and the light source position **/
           Point3D lightRay = lightSource.getLightSourcePosition().subtractVector(cameraIntersection);
           /** Chech if this ray intersects with another shape **/
           Point3D lightIntersection = intersectWithSponge(cameraIntersection, lightRay);
           if(lightIntersection == null) { // If there is no shape blocking the light, calculate the light intensity at that point on the shape
             /** Calculate diffuse light **/
+            Point3D normalToIntersection = cameraIntersection.subtractVector(sphere.getSphereCenter());
             double diffuseLight = lightSource.calcDiffuseLight(cameraIntersection, lightRay);
-            System.out.println("Diffuse Light: " + diffuseLight);
             /** Calculate Speculate Reflection **/
             double specularReflectionLight = lightSource.calcSpecularReflection(cameraIntersection, lightRay, diffuseLight);
-            System.out.println("Specular Reflection: " + specularReflectionLight);
             pixelColors[x][y] = lightSource.ambientLight + diffuseLight + specularReflectionLight;
           } else {
             /** Set pixel color to the Ambient Light **/
-            pixelColors[x][y] = lightSource.ambientLight;
+            pixelColors[x][y] = lightSource.ambientLight; //if the point is in shadow from another shape, set the pixel to the ambient value
           }
         } else {
             /** Set pixel color to the Ambient Light **/
-          pixelColors[x][y] = lightSource.ambientLight;
+          pixelColors[x][y] = 0.0; //if the ray does not intersect with a shape, set that pixel to black (background color)
         }
       }
     }
-    int imageWidth = (int)imgResolution.getWidth();
-    int imageHeight = (int)imgResolution.getHeight();
-    render(new BufferedImage(imageWidth, imageHeight,  BufferedImage.TYPE_INT_RGB), pixelColors);
+    render(new BufferedImage((int)imgResolution.getWidth(), (int)imgResolution.getHeight(),  BufferedImage.TYPE_INT_RGB), pixelColors);
     return pixelColors;
   }
 
@@ -82,10 +79,22 @@ public class RayTracer implements MengerSponge {
     double aspectRatio = imgResolution.getWidth()/imgResolution.getHeight();
     /** Convert NDC Space to Screen Space **/
     double pixelScreenX = (2 * pixelNDCx) - 1;
-    double pixelScreenY = (2 * pixelNDCy) - 1;
-    /** Conver Screen Space to Camera **/
-    double pixelCameraX = (2 * pixelScreenX - 1) * Math.tan(Math.toRadians(horizontalFOVAngle/2));
-    double pixelCameraY = (1 - (2 * pixelScreenY)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
+    double pixelScreenY = 1 - (2 * pixelNDCy);
+    double pixelCameraX = 0.0;
+    double pixelCameraY = 0.0;
+    if(imgResolution.getWidth() > imgResolution.getHeight()) {
+      /** Conver Screen Space to Camera **/
+      pixelCameraX = (2 * pixelScreenX - 1) * aspectRatio * Math.tan(Math.toRadians(horizontalFOVAngle/2));
+      pixelCameraY = (1 - (2 * pixelScreenY)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
+    } else if (imgResolution.getWidth() < imgResolution.getHeight()) {
+      /** Conver Screen Space to Camera **/
+      pixelCameraX = (2 * pixelScreenX - 1) * Math.tan(Math.toRadians(horizontalFOVAngle/2));
+      pixelCameraY = (1 - (2 * pixelScreenY)) * aspectRatio * Math.tan(Math.toRadians(verticalFOVAngle/2));
+    } else if (imgResolution.getWidth() == imgResolution.getHeight()) {
+      /** Conver Screen Space to Camera **/
+      pixelCameraX = (2 * pixelScreenX - 1) * Math.tan(Math.toRadians(horizontalFOVAngle/2));
+      pixelCameraY = (1 - (2 * pixelScreenY)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
+    }
 
     return new Point3D(pixelCameraX, pixelCameraY, -1.0);
   }

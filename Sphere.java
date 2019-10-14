@@ -31,4 +31,8 @@ public class Sphere {
     public double getDistanceToIntersection() {
         return distanceToIntersection;
     }
+
+    public Point3D getSphereCenter() {
+      return center;
+    }
 }
