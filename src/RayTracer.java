@@ -53,7 +53,7 @@ public class RayTracer implements MengerSponge {
             pixelColors[x][y] = lightSource.ambientLight; //if the point is in shadow from another shape, set the pixel to the ambient value
           }
         } else {
-            /** Set pixel color to the Ambient Light **/
+          /** Set pixel color to the Ambient Light **/
           pixelColors[x][y] = 0.0; //if the ray does not intersect with a shape, set that pixel to black (background color)
         }
       }
