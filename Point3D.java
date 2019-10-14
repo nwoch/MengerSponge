@@ -1,3 +1,4 @@
+
 /**
  * @author Nicole Woch
  * Class which represents a point/vector in 3-dimensional space and provides operations that can be performed on/with it.
