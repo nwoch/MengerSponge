@@ -36,7 +36,7 @@ public class LightSource {
      * Calculates diffuse light from the light source at a point on a surface
      * using the normal vector at that point and the vector from the point to the light source.
      */
-    private double calcDiffuseLight(Point3D normalVector, Point3D lightVector) {
+    public double calcDiffuseLight(Point3D normalVector, Point3D lightVector) {
         Point3D unitNormal = normalVector.normalize();
         Point3D unitLight = lightVector.normalize();
         double cos = unitNormal.dotProduct(unitLight);
@@ -48,7 +48,7 @@ public class LightSource {
      * Calculates specular reflection from the light source at a point on a surface
      * using the vector from the point to the eye and the reflected ray at that point.
      */
-    private double calcSpecularReflection(Point3D normalVector, Point3D lightVector, double diffuseLight) {
+    public double calcSpecularReflection(Point3D normalVector, Point3D lightVector, double diffuseLight) {
         double projectionLength = lightVector.dotProduct(normalVector)/normalVector.magnitude();
         Point3D w = normalVector.normalize().scale(projectionLength);
         Point3D reflectedRay = w.scale(2).subtractVector(lightVector);
@@ -60,5 +60,8 @@ public class LightSource {
 
     /** Getters & Setters */
     public void setLightSourcePosition(Point3D lightSourcePosition) { this.lightSourcePosition = lightSourcePosition; }
+    public Point3D getLightSourcePosition() { return lightSourcePosition; }
+    public int getAmbientLight() { return ambientLight; }
+
 
 }

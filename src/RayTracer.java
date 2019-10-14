@@ -2,16 +2,19 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.awt.*;
 
-public class RayTracer implements MengerSponge {
+public class RayTracer {
 
   BufferedImage image;
 
   Sphere sphere;
 
+  MengerSponge mengerSponge;
+
   double counter;
 
   public RayTracer() {
-    sphere = new Sphere(130.0, new Point3D(0.0,0.0,-200.0)); //change this to place the sphere
+    //sphere = new Sphere(130.0, new Point3D(0.0,0.0,-200.0)); //change this to place the sphere
+    mengerSponge = new MengerSponge();
     counter = 0;
   }
 
@@ -26,31 +29,42 @@ public class RayTracer implements MengerSponge {
   }
 
   public double[][] rayTrace(Point3D cameraPosition, double horizontalFOVAngle, double verticalFOVAngle, Dimension imgResolution, LightSource lightSource) {
+    PerspectiveCanvas screen = new PerspectiveCanvas(
+            new javafx.geometry.Point3D(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ()),
+            new javafx.geometry.Point3D(0,0,0),
+            new javafx.geometry.Point3D(0, 1, 0),
+            Math.toRadians(horizontalFOVAngle),
+            imgResolution.width/imgResolution.getHeight());
+
     double[][] pixelColors = new double[(int)imgResolution.getWidth()][(int)imgResolution.getHeight()];
     for(int y = 0; y < imgResolution.getHeight(); y++) { //y pixel coordinate
       for(int x = 0; x < imgResolution.getWidth(); x++) { //x pixel coordiante
         /** Create the View Plane and find coordinate in center of current pixel to create new 3D point **/
-        Point3D fieldOfViewCoordinate = createViewPlane(x, y, cameraPosition, horizontalFOVAngle, verticalFOVAngle, imgResolution);
+        javafx.geometry.Point3D javafx = screen.getWorldPointFromCanvasCoord(x/imgResolution.getWidth(), y/imgResolution.getHeight());
+        Point3D fieldOfViewCoordinate = new Point3D(javafx.getX(), javafx.getY(), javafx.getZ());
+
         /** Create a ray from the camera position to the view plane coordinates **/
         Point3D cameraRay = fieldOfViewCoordinate.subtractVector(cameraPosition);
         cameraRay = cameraRay.normalize();
         /** Check if this create ray intersects with the sphere **/
-        Point3D cameraIntersection = intersectWithSphere(cameraPosition, cameraRay);
+        Intersection cameraIntersection = mengerSponge.intersectWithSponge(cameraPosition, cameraRay);
         if(cameraIntersection != null) { //If the ray does intersect with the sphere shape
           /** Create a ray from this point of intersection and the light source position **/
-          Point3D lightRay = lightSource.getLightSourcePosition().subtractVector(cameraIntersection);
+          Point3D lightRay = lightSource.getLightSourcePosition().subtractVector(cameraIntersection.getIntersectionPoint());
+          // TODO: Move slightly away from the surface of the face to avoid shadow acne
+          double EPSILON = 0.0001;
           /** Chech if this ray intersects with another shape **/
-          Point3D lightIntersection = intersectWithSponge(cameraIntersection, lightRay);
+          Intersection lightIntersection = mengerSponge.intersectWithSponge(cameraIntersection.getIntersectionPoint().addVector(cameraIntersection.getNormalVector().scale(EPSILON)), lightRay);
           if(lightIntersection == null) { // If there is no shape blocking the light, calculate the light intensity at that point on the shape
             /** Calculate diffuse light **/
-            Point3D normalToIntersection = cameraIntersection.subtractVector(sphere.getSphereCenter());
-            double diffuseLight = lightSource.calcDiffuseLight(cameraIntersection, lightRay);
+            //Point3D normalToIntersection = cameraIntersection.subtractVector(sphere.getSphereCenter());
+            double diffuseLight = lightSource.calcDiffuseLight(cameraIntersection.getNormalVector(), lightRay);
             /** Calculate Speculate Reflection **/
-            double specularReflectionLight = lightSource.calcSpecularReflection(cameraIntersection, lightRay, diffuseLight);
-            pixelColors[x][y] = lightSource.ambientLight + diffuseLight + specularReflectionLight;
+            double specularReflectionLight = lightSource.calcSpecularReflection(cameraIntersection.getNormalVector(), lightRay, diffuseLight);
+            pixelColors[x][y] = lightSource.getAmbientLight() + diffuseLight + specularReflectionLight;
           } else {
             /** Set pixel color to the Ambient Light **/
-            pixelColors[x][y] = lightSource.ambientLight; //if the point is in shadow from another shape, set the pixel to the ambient value
+            pixelColors[x][y] = lightSource.getAmbientLight(); //if the point is in shadow from another shape, set the pixel to the ambient value
           }
         } else {
           /** Set pixel color to the Ambient Light **/

@@ -2,11 +2,10 @@ import java.util.*;
 
 public class MengerSponge {
 
-    private Queue<SpongeCube> cubes;
+    private final SpongeCube outerCube;
 
     public MengerSponge() {
-        cubes = new LinkedList<>();
-        cubes.add(new SpongeCube(new Point3D(-100.0, 100.0, -100.0), 200.0, 4));
+        this.outerCube = new SpongeCube(new Point3D(-500.0, -500.0, -500.0), 1000.0, 5);
     }
 
 //    public List<SpongeCube> buildMengerSponge(List<SpongeCube> currentSpongeCubes, int n) {
@@ -34,8 +33,13 @@ public class MengerSponge {
 //    }
 
     public Intersection intersectWithSponge(Point3D startingPoint, Point3D ray) {
+        //ray should be normalized?
         //make increments generic for any direction
         List<SpongeCube> intersectedCubes = new ArrayList<>();
+
+        Queue<SpongeCube> cubes = new LinkedList<>();
+        cubes.add(outerCube);
+
         while(!cubes.isEmpty()) {
             SpongeCube cube = cubes.remove();
             if(cube.intersectsSpongeCube(startingPoint, ray)) {
@@ -47,15 +51,22 @@ public class MengerSponge {
                     double upperLeftY = cube.getUpperLeftVertex().getY();
                     double upperLeftZ = cube.getUpperLeftVertex().getZ();
                     int level = cube.getLevel();
-                    for(int i = 0; i < 3; i++) {
-                        double y = upperLeftY * -i;
-                        for(int j = 0; j < 3; j++) {
-                            double z = upperLeftZ * j;
-                            for(int k = 0; k < 3; k++) {
-                                double x = upperLeftX * k;
-                                if((i == 2 || j != 1 || k != 1) && (i != 1 || (j + k) % 2 == 0)) {
-                                    cubes.add(new SpongeCube(new Point3D(x, y, z), edgeIncrement, level - 1));
+                    for(int yIndex = 0; yIndex < 3; yIndex++) {
+                        double y = upperLeftY + yIndex*edgeIncrement;
+                        for(int zIndex = 0; zIndex < 3; zIndex++) {
+                            double z = upperLeftZ + zIndex*edgeIncrement;
+                            for(int xIndex = 0; xIndex < 3; xIndex++) {
+                                double x = upperLeftX + xIndex*edgeIncrement;
+                                if (yIndex == 1 && zIndex == 1) {
+                                    continue;
                                 }
+                                if (yIndex == 1 && xIndex == 1) {
+                                    continue;
+                                }
+                                if (zIndex == 1 && xIndex == 1) {
+                                    continue;
+                                }
+                                cubes.add(new SpongeCube(new Point3D(x, y, z), edgeIncrement, level - 1));
                             }
                         }
                     }
