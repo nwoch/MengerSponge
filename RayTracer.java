@@ -11,7 +11,7 @@ public class RayTracer implements MengerSponge {
   double counter;
 
   public RayTracer() {
-    sphere = new Sphere(200.0, new Point3D(0.0,0.0,-300.0)); //change this to place the sphere
+    sphere = new Sphere(130.0, new Point3D(0.0,0.0,-200.0)); //change this to place the sphere
     counter = 0;
   }
 
@@ -77,23 +77,20 @@ public class RayTracer implements MengerSponge {
     double pixelNDCx = (double)(x + 0.5) / imgResolution.getWidth();
     double pixelNDCy = (double)(y + 0.5) / imgResolution.getHeight();
     double aspectRatio = imgResolution.getWidth()/imgResolution.getHeight();
-    /** Convert NDC Space to Screen Space **/
-    double pixelScreenX = (2 * pixelNDCx) - 1;
-    double pixelScreenY = 1 - (2 * pixelNDCy);
     double pixelCameraX = 0.0;
     double pixelCameraY = 0.0;
     if(imgResolution.getWidth() > imgResolution.getHeight()) {
       /** Conver Screen Space to Camera **/
-      pixelCameraX = (2 * pixelScreenX - 1) * aspectRatio * Math.tan(Math.toRadians(horizontalFOVAngle/2));
-      pixelCameraY = (1 - (2 * pixelScreenY)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
+      pixelCameraX = (2 * pixelNDCx - 1) * aspectRatio * Math.tan(Math.toRadians(horizontalFOVAngle/2));
+      pixelCameraY = (1 - (2 * pixelNDCy)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
     } else if (imgResolution.getWidth() < imgResolution.getHeight()) {
       /** Conver Screen Space to Camera **/
-      pixelCameraX = (2 * pixelScreenX - 1) * Math.tan(Math.toRadians(horizontalFOVAngle/2));
-      pixelCameraY = (1 - (2 * pixelScreenY)) * aspectRatio * Math.tan(Math.toRadians(verticalFOVAngle/2));
+      pixelCameraX = (2 * pixelNDCx - 1) * Math.tan(Math.toRadians(horizontalFOVAngle/2));
+      pixelCameraY = (1 - (2 * pixelNDCy)) * aspectRatio * Math.tan(Math.toRadians(verticalFOVAngle/2));
     } else if (imgResolution.getWidth() == imgResolution.getHeight()) {
       /** Conver Screen Space to Camera **/
-      pixelCameraX = (2 * pixelScreenX - 1) * Math.tan(Math.toRadians(horizontalFOVAngle/2));
-      pixelCameraY = (1 - (2 * pixelScreenY)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
+      pixelCameraX = (2 * pixelNDCx - 1) * Math.tan(Math.toRadians(horizontalFOVAngle/2));
+      pixelCameraY = (1 - (2 * pixelNDCy)) * Math.tan(Math.toRadians(verticalFOVAngle/2));
     }
 
     return new Point3D(pixelCameraX, pixelCameraY, -1.0);
