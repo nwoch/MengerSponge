@@ -29,20 +29,22 @@ public class RayTracer {
   }
 
   public double[][] rayTrace(Point3D cameraPosition, double horizontalFOVAngle, double verticalFOVAngle, Dimension imgResolution, LightSource lightSource) {
-    PerspectiveCanvas screen = new PerspectiveCanvas(
-            new javafx.geometry.Point3D(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ()),
-            new javafx.geometry.Point3D(0,0,0),
-            new javafx.geometry.Point3D(0, 1, 0),
-            Math.toRadians(horizontalFOVAngle),
-            imgResolution.width/imgResolution.getHeight());
+    // PerspectiveCanvas screen = new PerspectiveCanvas(
+    //         new javafx.geometry.Point3D(cameraPosition.getX(), cameraPosition.getY(), cameraPosition.getZ()),
+    //         new javafx.geometry.Point3D(0, 0, 0),
+    //         new javafx.geometry.Point3D(0, 1, 0),
+    //         Math.toRadians(horizontalFOVAngle),
+    //         imgResolution.width/imgResolution.getHeight());
 
+    ViewPlane plane = new ViewPlane(cameraPosition, new Point3D(0.0, 0.0, 0.0), new Point3D(0.0, 1.0, 0.0), Math.toRadians(horizontalFOVAngle), imgResolution.getWidth()/imgResolution.getHeight());
     double[][] pixelColors = new double[(int)imgResolution.getWidth()][(int)imgResolution.getHeight()];
     for(int y = 0; y < imgResolution.getHeight(); y++) { //y pixel coordinate
       for(int x = 0; x < imgResolution.getWidth(); x++) { //x pixel coordiante
         /** Create the View Plane and find coordinate in center of current pixel to create new 3D point **/
-        javafx.geometry.Point3D javafx = screen.getWorldPointFromCanvasCoord(x/imgResolution.getWidth(), y/imgResolution.getHeight());
-        Point3D fieldOfViewCoordinate = new Point3D(javafx.getX(), javafx.getY(), javafx.getZ());
+        //javafx.geometry.Point3D javafx = screen.getWorldPointFromCanvasCoord(x/imgResolution.getWidth(), y/imgResolution.getHeight());
+        //Point3D fieldOfViewCoordinate = new Point3D(javafx.getX(), javafx.getY(), javafx.getZ());
 
+        Point3D fieldOfViewCoordinate = plane.getNewCoorindates(x/imgResolution.getWidth(), y/imgResolution.getHeight());
         /** Create a ray from the camera position to the view plane coordinates **/
         Point3D cameraRay = fieldOfViewCoordinate.subtractVector(cameraPosition);
         cameraRay = cameraRay.normalize();
@@ -74,16 +76,6 @@ public class RayTracer {
     }
     render(new BufferedImage((int)imgResolution.getWidth(), (int)imgResolution.getHeight(),  BufferedImage.TYPE_INT_RGB), pixelColors);
     return pixelColors;
-  }
-
-  public Point3D intersectWithSphere(Point3D startingPoint, Point3D ray) {
-    //returns intersection point if it exists, otherwise returns null
-    return sphere.intersectWithSphere(startingPoint, ray);
-  }
-
-  public Point3D intersectWithSponge(Point3D startingPoint, Point3D ray) {
-    //returns intersection point if it exists, otherwise returns null
-    return null;
   }
 
   public Point3D createViewPlane(int x, int y, Point3D cameraPosition, double horizontalFOVAngle, double verticalFOVAngle, Dimension imgResolution) {
