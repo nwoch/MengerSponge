@@ -1,6 +1,12 @@
+/** Emma Blair and Nicole Woch Final Project - Computer Graphics 2019 **/
+
 import java.awt.*;
 import javax.swing.*;
 
+/**
+ ** This class create a JFrame and instantiates a Canvas class that
+ ** puts the JPanel in Canvas on the JFrame to be displayed
+**/
 public class Draw {
 
   public static void main(String args[]) {
