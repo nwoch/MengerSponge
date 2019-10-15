@@ -1,11 +1,15 @@
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class MengerSponge {
+
+    //implement shape interface?
 
     private final SpongeCube outerCube;
 
     public MengerSponge() {
-        this.outerCube = new SpongeCube(new Point3D(-500, -500, -500.0), 1000.0, 4);
+        this.outerCube = new SpongeCube(new Point3D(-500, -500, -500.0), 1000.0, 3);
     }
 
 //    public List<SpongeCube> buildMengerSponge(List<SpongeCube> currentSpongeCubes, int n) {

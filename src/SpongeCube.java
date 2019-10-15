@@ -108,6 +108,7 @@ public class SpongeCube {
         return currentMax;
     }
 
+    //this works bc cube is always aligned with axes - can only be translated, not rotated
     public Point3D findIntersectedFaceNormal(Point3D intersectionPoint) {
         if (almostEqual(intersectionPoint.getX(), upperLeftVertex.getX())) {
             // Left face
