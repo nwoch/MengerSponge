@@ -2,13 +2,6 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.geom.*;
-import java.lang.Math.*;
-import java.util.*;
-import java.awt.image.*;
-import java.io.*;
-import javax.imageio.*;
 import java.util.ArrayList;
 
 /**
@@ -18,25 +11,28 @@ import java.util.ArrayList;
 **/
 public class Canvas extends JPanel {
 
-  /** Instance of RayTracer class **/
-  RayTracer rayTracer;
-
-  /** Create scene points and image size **/
-  Point3D camera = new Point3D(1000.0, -800.0, 1000.0); //set camera point
-  Point3D lightBlue = new Point3D(1000.0, -700.0, 1000.0); //set light point
-  Point3D lightRed = new Point3D(-1000.0, -1000.0, 1000.0); //set light point
-    Point3D camera = new Point3D(1400, -1200, 1600); //set camera point - front: 0, 0, 1500 or angled: 1400, -1200, 1600
-    Point3D light = new Point3D(1000, -900, 1000); //set light point - front: 0, 0, 1000 or angled: 1000, -900, 1000
-    Dimension imageResolution = new Dimension(800, 1000); //image size
-  ArrayList<LightSource> allLightSources = new ArrayList<LightSource>();
+  private RayTracer rayTracer;
+  private Point3D camera;
+  private Point3D lightBlue;
+  private Point3D lightRed;
+  private Dimension imageResolution;
+  private ArrayList<LightSource> lightSources;
 
   /** Set size and background color of JPanel and instantiate variables **/
   public Canvas() {
+    this.rayTracer = new RayTracer();
+
+    /** Create scene points and image size **/
+    this.camera = new Point3D(1400.0, -1200.0, 1600.0); //set camera point - front: 0, 0, 1500 or angled: 1400, -1200, 1600
+    this.lightBlue = new Point3D(1000.0, -700.0, 1000.0); //set light point - front: 0, 0, 1000 or angled: 1000, -900, 1000
+    this.lightRed = new Point3D(-1000.0, -1000.0, 1000.0); //set light point - front: 0, 0, 1000 or angled: -1000, -900, 1000
+    this.imageResolution = new Dimension(1400, 1000); //image size
+    this.lightSources = new ArrayList<>();
+    this.lightSources.add(new LightSource(lightBlue, 50)); //Add new light source to this list
+    this.lightSources.add(new LightSource(lightRed, 50)); //Add a new light source to this list
+
     setPreferredSize(imageResolution);
     setBackground(Color.white);
-    rayTracer = new RayTracer();
-    allLightSources.add(new LightSource(lightBlue, 50)); //Add new light source to this list
-    allLightSources.add(new LightSource(lightRed, 50)); //Add a new light source to this list
   }
 
   /** Method draws to the JPanel **/
@@ -44,8 +40,8 @@ public class Canvas extends JPanel {
     super.paintComponent(g);
     Graphics2D g2d = (Graphics2D)g;
     /** Call rayTrace to create the image **/
-    rayTracer.rayTrace(camera, 90, imageResolution, allLightSources);
+    rayTracer.rayTrace(camera, imageResolution, lightSources);
     /** Draw the BufferedImage to the screen **/
-    g2d.drawImage(rayTracer.image, 0, 0, this);
+    g2d.drawImage(rayTracer.getImage(), 0, 0, this);
   }
 }

@@ -63,5 +63,4 @@ public class LightSource {
     public Point3D getLightSourcePosition() { return lightSourcePosition; }
     public int getAmbientLight() { return ambientLight; }
 
-
 }

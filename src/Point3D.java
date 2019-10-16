@@ -3,12 +3,11 @@
  * @author Nicole Woch
  * Class which represents a point/vector in 3-dimensional space and provides operations that can be performed on/with it.
  */
-public class  Point3D {
+public class Point3D {
 
-    // TODO: make nicole happy about this
-    public double x;
-    public double y;
-    public double z;
+    private double x;
+    private double y;
+    private double z;
 
     /** Constructor which sets the x, y, and z coordinates/directions of the point/vector. */
     public Point3D(double x, double y, double z) {

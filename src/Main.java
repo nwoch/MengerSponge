@@ -6,13 +6,13 @@ import javax.swing.*;
 /**
  ** This class create a JFrame and instantiates a Canvas class that
  ** puts the JPanel in Canvas on the JFrame to be displayed
-**/
-public class Draw {
+ **/
+public class Main {
 
   public static void main(String args[]) {
     /** Create two JFrames **/
     JFrame canvasFrame = new JFrame();
-    canvasFrame.setTitle("Ray Tracer"); //Label the window
+    canvasFrame.setTitle("Menger Sponge"); //Label the window
     canvasFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Quits the program is window is closed
 
     /** Creates classes to be added to the JFrames **/
