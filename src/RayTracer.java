@@ -14,7 +14,7 @@ public class RayTracer {
 
   public RayTracer() {
     //sphere = new Sphere(130.0, new Point3D(0.0,0.0,-200.0)); //change this to place the sphere
-    mengerSponge = new MengerSponge();
+    mengerSponge = new MengerSponge(new Point3D(-500, -500, -500.0), 1000.0, 3);
     counter = 0;
   }
 
@@ -49,14 +49,14 @@ public class RayTracer {
         Point3D cameraRay = fieldOfViewCoordinate.subtractVector(cameraPosition);
         cameraRay = cameraRay.normalize();
         /** Check if this create ray intersects with the sphere **/
-        Intersection cameraIntersection = mengerSponge.intersectWithSponge(cameraPosition, cameraRay);
+        CubeIntersection cameraIntersection = mengerSponge.intersectWithRay(cameraPosition, cameraRay);
         if(cameraIntersection != null) { //If the ray does intersect with the sphere shape
           /** Create a ray from this point of intersection and the light source position **/
           Point3D lightRay = lightSource.getLightSourcePosition().subtractVector(cameraIntersection.getIntersectionPoint());
           // TODO: Move slightly away from the surface of the face to avoid shadow acne
           double EPSILON = 0.0001;
           /** Chech if this ray intersects with another shape **/
-          Intersection lightIntersection = mengerSponge.intersectWithSponge(cameraIntersection.getIntersectionPoint().addVector(cameraIntersection.getNormalVector().scale(EPSILON)), lightRay);
+          CubeIntersection lightIntersection = mengerSponge.intersectWithRay(cameraIntersection.getIntersectionPoint().addVector(cameraIntersection.getNormalVector().scale(EPSILON)), lightRay);
           if(lightIntersection == null) { // If there is no shape blocking the light, calculate the light intensity at that point on the shape
             /** Calculate diffuse light **/
             //Point3D normalToIntersection = cameraIntersection.subtractVector(sphere.getSphereCenter());
