@@ -1,4 +1,4 @@
-/** Emma Blair and Nicole Woch Final Project - Compter Graphics 2019 **/
+/** Emma Blair and Nicole Woch Final Project - Computer Graphics 2019 **/
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
  ** The RayTracer class is responsible for creating a BufferedImage to display in the Canvas class,
  ** creating a ViewPlane instance that creates the scene based on the current location of the camera,
  ** and then generating camera rays to shoot into the scene where in the intersections methods determine
- ** how the ray intersects with the Menger Sponge. Then the RayTracer find the diffuse and specular relfections
+ ** how the ray intersects with the Menger Sponge. Then the RayTracer find the diffuse and specular reflections
  ** by following a vector from the intersection to the light source. If this vector intersects with another point
  ** on the cube before it hits the light, then this point is in shadow and is set to the ambient light.
 **/
@@ -50,7 +50,7 @@ public class RayTracer {
     /** Create a new view plane with the cameraPosition, the center of the object (0,0,0), a vector corresponding to normal y axis (0,1,0),
      ** the horizontal field of view angle (included in calculation of the width of the plane), and the dimensions of the BufferedImage
     **/
-    ViewPlane plane = new ViewPlane(Math.toRadians(70),
+    ViewPlane plane = new ViewPlane(new Point3D(0.0, 0.0, 0.0), Math.toRadians(70),
                      imgResolution.getWidth()/imgResolution.getHeight(), cameraPosition);
     /** Create BufferedImage set at the dimensions passed into the rayTrace method **/
     image = new BufferedImage((int)imgResolution.getWidth(), (int)imgResolution.getHeight(),  BufferedImage.TYPE_INT_RGB);
@@ -68,10 +68,11 @@ public class RayTracer {
           /** Create a ray from current point of intersection and the light source positions **/
           Point3D lightRayBlue = lightSources.get(0).getLightSourcePosition().subtractVector(cameraIntersection.getIntersectionPoint());
           Point3D lightRayRed = lightSources.get(1).getLightSourcePosition().subtractVector(cameraIntersection.getIntersectionPoint());
-          /** Move slightly away from the surface of the face to avoid shadow acne **/
+          /** Move slightly away from the surface of the face to avoid intersecting shadow ray with original point **/
+          Point3D shiftedIntersectionPoint = cameraIntersection.getIntersectionPoint().addVector(cameraIntersection.getNormalVector().scale(0.0001));
           /** Check if each light vector intersects with anywhere else on the sponge **/
-          CubeIntersection lightIntersectionBlue = mengerSponge.intersectWithRay(cameraIntersection.getIntersectionPoint().addVector(cameraIntersection.getNormalVector().scale(0.0001)), lightRayBlue);
-          CubeIntersection lightIntersectionRed = mengerSponge.intersectWithRay(cameraIntersection.getIntersectionPoint().addVector(cameraIntersection.getNormalVector().scale(0.0001)), lightRayRed);
+          CubeIntersection lightIntersectionBlue = mengerSponge.intersectWithRay(shiftedIntersectionPoint, lightRayBlue);
+          CubeIntersection lightIntersectionRed = mengerSponge.intersectWithRay(shiftedIntersectionPoint, lightRayRed);
           if(lightIntersectionBlue == null && lightIntersectionRed == null) { // If there is no shape blocking the light vector, calculate the light intensity at that point on the shape
             /** Calculate diffuse light using methods in LightSource class **/
             diffuseLightBlue = lightSources.get(0).calcDiffuseLight(cameraIntersection.getNormalVector(), lightRayBlue);

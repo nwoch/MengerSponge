@@ -15,14 +15,14 @@ public class ViewPlane {
   private Point3D horizontalViewVector;
   private Point3D verticalViewVector;
 
-  public ViewPlane(double fieldOfViewAngle, double widthHeightRatio, Point3D cameraPosition) {
+  public ViewPlane(Point3D centerOfScene, double horizontalFOVAngle, double widthHeightRatio, Point3D cameraPosition) {
+    this.centerOfScene = centerOfScene;
     /** Set camera viewing object to the object center passed in from the Ray Tracer **/
-    this.centerOfScene = new Point3D(0.0, 0.0, 0.0);
-    calcViewPlaneDimensions(fieldOfViewAngle, widthHeightRatio, cameraPosition);
+    calcViewPlaneDimensions(horizontalFOVAngle, widthHeightRatio, cameraPosition);
   }
 
   /** This method computes the height and the width of the view plane **/
-  private void calcViewPlaneDimensions(double fieldOfViewAngle, double widthHeightRatio, Point3D cameraPosition) {
+  private void calcViewPlaneDimensions(double horizontalFOVAngle, double widthHeightRatio, Point3D cameraPosition) {
     /** Create a vector (new z axis) from the camera position to the center of the shape that is being viewed **/
     Point3D forwardVector = centerOfScene.subtractVector(cameraPosition);
     /**
@@ -30,11 +30,11 @@ public class ViewPlane {
      ** plane of the forwardVector in order to get a new vector perpendicular to the forwardVector that corresponds the normal
      ** y vector in the normal coordinate system for this new coordinates system for the camera
      **/
-    this.verticalViewVector = projectVectorOntoPlane(new Point3D(0.0, 1.0, 0.0), forwardVector);
+    this.verticalViewVector = projectVectorOntoPlane(new Point3D(0.0, 1.0, 0.0), forwardVector).normalize();
     /** Create a vector (new x axis) that is perpendicular to both new y and z vectors by using the cross product **/
     this.horizontalViewVector = forwardVector.crossProduct(verticalViewVector).normalize();
     /** Find the viewPlaneWidth of the screen using the horizontal Field of View Angle (is set in the Canvas class) for the view plane and the length of the forwardVector to get the correct proportions **/
-    this.viewPlaneWidth = 2 * Math.tan(fieldOfViewAngle/2.0) * forwardVector.magnitude();
+    this.viewPlaneWidth = 2 * Math.tan(horizontalFOVAngle/2.0) * forwardVector.magnitude();
     this.viewPlaneHeight = viewPlaneWidth/widthHeightRatio;
   }
 
@@ -51,7 +51,7 @@ public class ViewPlane {
   }
 
   /**
-   ** This method is used to create the upVector (new y vector for the camera position) by using the passed
+   ** This method is used to create the vertical view vector (new y vector for the camera position) by using the passed
    ** in (0,1,0) vector and the vector from the camera to the center of the object we are looking at (new z vector)
    ** and get the new up vector for the camera by projecting this arbitrary vector onto the plane of the new z vector. Use
    ** the equation (u * v /(|v|^2)) * v where u and v are vectors.
